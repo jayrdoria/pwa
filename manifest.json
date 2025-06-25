@@ -1,8 +1,8 @@
 {
   "name": "X7 Casino",
   "short_name": "X7 Casino",
-  "start_url": "/",
-  "scope": "/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#5b0c62",
