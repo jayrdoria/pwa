@@ -179,8 +179,11 @@
         window.matchMedia("(display-mode: standalone)").matches ||
         window.navigator.standalone === true;
 
-      // Check if user has already seen the banner or modal
-      const alreadyHandled = localStorage.getItem("x7_installed") === "true";
+      // Check if prompt should reappear after 7 days
+      const dismissedAt = parseInt(localStorage.getItem("x7_dismissed_at"), 10);
+      const sevenDays = 7 * 24 * 60 * 60 * 1000;
+      const shouldShowPrompt =
+        isNaN(dismissedAt) || Date.now() - dismissedAt > sevenDays;
 
       // Detect platform
       const isIos = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
@@ -212,8 +215,8 @@
         });
       }
 
-      // Show install banner if not installed and not dismissed
-      if (!isStandalone && !alreadyHandled) {
+      // Show install banner if not installed and time has passed
+      if (!isStandalone && shouldShowPrompt) {
         window.addEventListener("beforeinstallprompt", (e) => {
           e.preventDefault();
           deferredPrompt = e;
@@ -233,7 +236,7 @@
 
             if (result.outcome === "accepted") {
               console.log("User installed the app");
-              localStorage.setItem("x7_installed", "true");
+              localStorage.setItem("x7_dismissed_at", Date.now());
             }
 
             deferredPrompt = null;
@@ -244,7 +247,7 @@
       // Handle DISMISS
       document.getElementById("dismiss-btn").addEventListener("click", () => {
         document.getElementById("install-banner").style.display = "none";
-        localStorage.setItem("x7_installed", "true");
+        localStorage.setItem("x7_dismissed_at", Date.now());
       });
     </script>
   </body>
