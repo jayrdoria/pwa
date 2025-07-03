@@ -118,13 +118,15 @@
         border-radius: 8px;
         max-width: 400px;
         width: 100%;
-        text-align: center;
-        font-size: 14px;
+        text-align: justify;
+        font-size: 16px;
+        font-weight: bold;
         box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        line-height: 2;
       }
 
       #ios-ok-btn {
-        margin-top: 20px;
+        margin: 20px auto 0 auto; /* top margin, auto left and right for center */
         background-color: #07d8f4;
         color: black;
         border: 1px solid white;
@@ -133,10 +135,27 @@
         font-weight: bold;
         border-radius: 5px;
         cursor: pointer;
+        display: block; /* ensure it's treated as a block-level element */
       }
 
       #ios-ok-btn:hover {
         background-color: #05c0db;
+      }
+
+      #ios-msg-mobile {
+        display: block;
+        text-align: justify;
+        font-weight: bold;
+        font-size: 16px;
+        color: white;
+        margin-bottom: 15px;
+      }
+
+      #ios-img-mobile {
+        display: block;
+        margin: 0 auto;
+        max-width: 100%;
+        height: auto;
       }
 
       @media (max-width: 360px) {
@@ -166,7 +185,20 @@
     <!-- iOS Modal -->
     <div id="ios-modal" class="modal-overlay">
       <div class="modal-content">
-        <p id="ios-message"></p>
+        <p id="ios-msg-mobile" style="display: none">
+          To install X7 CASINO on mobile, you need to click the "Share Icon" and
+          "Add to Home Screen" to add an icon to your device.
+        </p>
+        <img
+          id="ios-img-mobile"
+          src="https://i.imgur.com/WAgYwgL.png"
+          alt="iOS Install Guide"
+        />
+
+        <p id="ios-msg-desktop" style="display: none">
+          To install X7 CASINO on desktop, you need to click the "Share or
+          Settings icon" and "Add to deck" to add an icon to your desktop.
+        </p>
         <button id="ios-ok-btn">OK</button>
       </div>
     </div>
@@ -174,80 +206,71 @@
     <script>
       let deferredPrompt;
 
-      // Detect standalone mode (already installed)
       const isStandalone =
         window.matchMedia("(display-mode: standalone)").matches ||
         window.navigator.standalone === true;
 
-      // Check if prompt should reappear after 7 days
       const dismissedAt = parseInt(localStorage.getItem("x7_dismissed_at"), 10);
-      const sevenDays = 7 * 24 * 60 * 60 * 1000;
+      const fourteenDays = 14 * 24 * 60 * 60 * 1000;
       const shouldShowPrompt =
-        isNaN(dismissedAt) || Date.now() - dismissedAt > sevenDays;
+        isNaN(dismissedAt) || Date.now() - dismissedAt > fourteenDays;
 
-      // Detect platform
       const isIos = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
       const isMac = /macintosh/.test(navigator.userAgent.toLowerCase());
       const isSafari = /^((?!chrome|android).)*safari/i.test(
         navigator.userAgent
       );
       const isInStandalone = window.navigator.standalone === true;
-      const hasSeenIosModal = localStorage.getItem("x7_ios_modal") === "true";
 
-      // Show iOS/macOS instruction modal
-      if ((isIos || isMac) && isSafari && !isInStandalone && !hasSeenIosModal) {
-        const modal = document.getElementById("ios-modal");
-        const message = document.getElementById("ios-message");
+      const showBanner = () => {
+        document.getElementById("install-banner").style.display = "flex";
+      };
 
-        if (isIos) {
-          message.innerText =
-            'To install PWA on mobile, you need to click Share Icon and "Add to Home Screen" to add an icon to your device.';
-        } else {
-          message.innerText =
-            'To install PWA on desktop, you need to click Share or Settings icon and "Add to deck" to add an icon to your desktop.';
-        }
-
-        modal.style.display = "flex";
-
-        document.getElementById("ios-ok-btn").addEventListener("click", () => {
-          modal.style.display = "none";
-          localStorage.setItem("x7_ios_modal", "true");
-        });
-      }
-
-      // Show install banner if not installed and time has passed
-      if (!isStandalone && shouldShowPrompt) {
-        window.addEventListener("beforeinstallprompt", (e) => {
-          e.preventDefault();
-          deferredPrompt = e;
-          document.getElementById("install-banner").style.display = "flex";
-        });
-      } else {
+      const hideBanner = () => {
         document.getElementById("install-banner").style.display = "none";
+      };
+
+      if (!isStandalone && shouldShowPrompt) {
+        showBanner();
       }
 
-      // Handle INSTALL
       document
         .getElementById("install-btn")
         .addEventListener("click", async () => {
-          if (deferredPrompt) {
+          if (isIos || (isMac && isSafari)) {
+            document.getElementById("ios-modal").style.display = "flex";
+
+            if (isIos) {
+              document.getElementById("ios-msg-mobile").style.display = "block";
+              document.getElementById("ios-msg-desktop").style.display = "none";
+            } else {
+              document.getElementById("ios-msg-mobile").style.display = "none";
+              document.getElementById("ios-msg-desktop").style.display =
+                "block";
+            }
+          } else if (deferredPrompt) {
             deferredPrompt.prompt();
             const result = await deferredPrompt.userChoice;
-
             if (result.outcome === "accepted") {
-              console.log("User installed the app");
               localStorage.setItem("x7_dismissed_at", Date.now());
             }
-
             deferredPrompt = null;
-            document.getElementById("install-banner").style.display = "none";
           }
         });
 
-      // Handle DISMISS
       document.getElementById("dismiss-btn").addEventListener("click", () => {
-        document.getElementById("install-banner").style.display = "none";
+        hideBanner();
         localStorage.setItem("x7_dismissed_at", Date.now());
+      });
+
+      document.getElementById("ios-ok-btn").addEventListener("click", () => {
+        document.getElementById("ios-modal").style.display = "none";
+        localStorage.setItem("x7_dismissed_at", Date.now());
+      });
+
+      window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
       });
     </script>
   </body>
