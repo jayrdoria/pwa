@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>X7 Casino PWA</title>
+    <link rel="manifest" href="./manifest.json" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap"
+      rel="stylesheet"
+    />
+
+    <script>
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker
+          .register("./service-worker.js")
+          .then((reg) => console.log("SW registered", reg))
+          .catch((err) => console.error("SW registration failed", err));
+      }
+    </script>
+
+    <style>
+      body {
+        font-family: "Open Sans", sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+
+      .install-container {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background: #5b0c62;
+        color: white;
+        padding: 20px 5%;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        box-sizing: border-box;
+        gap: 15px;
+        z-index: 1000;
+      }
+
+      .install-text {
+        flex: 1;
+        min-width: 200px;
+      }
+
+      .install-text h2 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: bold;
+      }
+
+      .install-text p {
+        margin: 5px 0 0 0;
+        font-size: 14px;
+        color: #ffffff;
+      }
+
+      .buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        align-items: center;
+        flex-shrink: 0;
+      }
+
+      #install-btn {
+        background-color: #07d8f4;
+        color: black;
+        border: 1px solid white;
+        padding: 10px 30px;
+        font-size: 14px;
+        font-weight: bold;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      #install-btn:hover {
+        background-color: #05c0db;
+      }
+
+      #dismiss-btn {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 13px;
+        font-style: italic;
+        cursor: pointer;
+        padding: 0;
+      }
+
+      /* iOS Modal */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        background: rgba(0, 0, 0, 0.8);
+        width: 100%;
+        height: 100%;
+        z-index: 2000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        box-sizing: border-box;
+      }
+
+      .modal-content {
+        background: #5b0c62;
+        color: white;
+        padding: 25px 20px;
+        border-radius: 8px;
+        max-width: 400px;
+        width: 100%;
+        text-align: justify;
+        font-size: 16px;
+        font-weight: bold;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        line-height: 2;
+      }
+
+      #ios-ok-btn {
+        margin: 20px auto 0 auto; /* top margin, auto left and right for center */
+        background-color: #07d8f4;
+        color: black;
+        border: 1px solid white;
+        padding: 10px 25px;
+        font-size: 14px;
+        font-weight: bold;
+        border-radius: 5px;
+        cursor: pointer;
+        display: block; /* ensure it's treated as a block-level element */
+      }
+
+      #ios-ok-btn:hover {
+        background-color: #05c0db;
+      }
+
+      #ios-msg-desktop {
+        padding-top: 10px;
+      }
+
+      #ios-msg-mobile {
+        display: block;
+        text-align: justify;
+        font-weight: bold;
+        font-size: 16px;
+        color: white;
+        margin-bottom: 15px;
+        padding-top: 10px;
+      }
+
+      #ios-img-mobile {
+        display: block;
+        margin: 0 auto;
+        max-width: 100%;
+        height: auto;
+        padding-top: 10px;
+      }
+
+      .close-button {
+        position: absolute;
+        top: 1px;
+        right: 15px;
+        font-size: 30px;
+        font-weight: bold;
+        color: white;
+        cursor: pointer;
+      }
+
+      .modal-content {
+        position: relative; /* required for absolute positioning of close-button */
+      }
+
+      @media (max-width: 360px) {
+        #install-btn {
+          padding: 10px 20px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Install Banner -->
+    <div id="install-banner" class="install-container">
+      <div class="install-text">
+        <h2>Install X7 CASINO?</h2>
+        <p>
+          You can install the X7 Casino app to use the full features of the
+          platform.
+        </p>
+      </div>
+      <div class="buttons">
+        <button id="install-btn">INSTALL</button>
+        <button id="dismiss-btn">No, Thankyou</button>
+      </div>
+    </div>
+
+    <!-- iOS Modal -->
+    <div id="ios-modal" class="modal-overlay">
+      <div class="modal-content">
+        <span id="close-modal" class="close-button">&times;</span>
+        <p id="ios-msg-mobile" style="display: none">
+          To install X7 CASINO on mobile, you need to click the "Share Icon" and
+          "Add to Home Screen" to add an icon to your device.
+          <img
+            id="ios-img-mobile"
+            src="https://i.imgur.com/WAgYwgL.png"
+            alt="iOS Install Guide"
+          />
+        </p>
+
+        <p id="ios-msg-desktop" style="display: none">
+          To install X7 CASINO on desktop, you need to click the "Share or
+          Settings icon" and "Add to dock" to add an icon to your desktop.
+        </p>
+        <button id="ios-ok-btn">OK</button>
+      </div>
+    </div>
+
+    <script>
+      let deferredPrompt;
+      const DISMISS_FLAG = "x7_installed";
+      const MODAL_FLAG = "x7_ios_modal";
+
+      const isIos = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
+      const isMac = /macintosh/.test(navigator.userAgent.toLowerCase());
+      const isSafari = /^((?!chrome|android).)*safari/i.test(
+        navigator.userAgent
+      );
+      const isStandalone =
+        window.matchMedia("(display-mode: standalone)").matches ||
+        window.navigator.standalone === true;
+
+      const alreadyDismissed = localStorage.getItem(DISMISS_FLAG) === "true";
+      const hasSeenIosModal = localStorage.getItem(MODAL_FLAG) === "true";
+
+      const showBanner = () => {
+        const banner = document.getElementById("install-banner");
+        if (banner) banner.style.display = "flex";
+      };
+
+      const hideBanner = () => {
+        const banner = document.getElementById("install-banner");
+        if (banner) banner.style.display = "none";
+      };
+
+      // Show banner via beforeinstallprompt for Chrome and Android
+      window.addEventListener("beforeinstallprompt", (e) => {
+        if (!isStandalone && !alreadyDismissed) {
+          e.preventDefault();
+          deferredPrompt = e;
+          showBanner();
+        }
+      });
+
+      // Show modal or banner on Safari (iOS/Mac)
+      window.addEventListener("DOMContentLoaded", () => {
+        if (
+          (isIos || isMac) &&
+          isSafari &&
+          !isStandalone &&
+          !alreadyDismissed &&
+          !hasSeenIosModal
+        ) {
+          const modal = document.getElementById("ios-modal");
+          const mobileMsg = document.getElementById("ios-msg-mobile");
+          const desktopMsg = document.getElementById("ios-msg-desktop");
+
+          if (isIos) {
+            mobileMsg.style.display = "block";
+            desktopMsg.style.display = "none";
+          } else {
+            mobileMsg.style.display = "none";
+            desktopMsg.style.display = "block";
+          }
+
+          modal.style.display = "flex";
+
+          document
+            .getElementById("ios-ok-btn")
+            .addEventListener("click", () => {
+              modal.style.display = "none";
+              localStorage.setItem(MODAL_FLAG, "true");
+              localStorage.setItem(DISMISS_FLAG, "true");
+            });
+
+          document
+            .getElementById("close-modal")
+            .addEventListener("click", () => {
+              modal.style.display = "none";
+              localStorage.setItem(MODAL_FLAG, "true");
+              localStorage.setItem(DISMISS_FLAG, "true");
+            });
+        }
+
+        if (
+          (isIos || isMac) &&
+          isSafari &&
+          !isStandalone &&
+          hasSeenIosModal &&
+          !alreadyDismissed
+        ) {
+          showBanner();
+        }
+      });
+
+      // Install button logic
+      document
+        .getElementById("install-btn")
+        .addEventListener("click", async () => {
+          if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const result = await deferredPrompt.userChoice;
+            if (result.outcome === "accepted") {
+              localStorage.setItem(DISMISS_FLAG, "true");
+            }
+            deferredPrompt = null;
+            hideBanner();
+          }
+        });
+
+      // Dismiss button logic (No, Thankyou)
+      document.getElementById("dismiss-btn").addEventListener("click", () => {
+        localStorage.setItem(DISMISS_FLAG, "true");
+        hideBanner();
+      });
+    </script>
+  </body>
+</html>

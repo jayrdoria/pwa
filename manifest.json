@@ -1,0 +1,21 @@
+{
+  "name": "X7 Casino",
+  "short_name": "X7 Casino",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#5b0c62",
+  "theme_color": "#5b0c62",
+  "icons": [
+    {
+      "src": "https://i.imgur.com/wgP4rNZ.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://i.imgur.com/3IVK3Op.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
