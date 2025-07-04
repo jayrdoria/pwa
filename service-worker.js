@@ -1,21 +1,19 @@
 self.addEventListener("install", (event) => {
-  console.log("Service Worker Installed");
+  console.log("✅ Service Worker Installed");
+
   event.waitUntil(
-    caches.open("stakes-cache").then((cache) => {
-      return cache.addAll([
-        "/",
-        "/index.html",
-        "/icon-192x192.png",
-        "/icon-512x512.png",
-      ]);
+    caches.open("x7-cache").then((cache) => {
+      return cache.addAll(["/index.html"]).catch((err) => {
+        console.error("❌ Cache addAll failed:", err);
+      });
     })
   );
 });
 
 self.addEventListener("fetch", (event) => {
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
+    caches.match(event.request).then((cachedResponse) => {
+      return cachedResponse || fetch(event.request);
     })
   );
 });
