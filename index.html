@@ -226,6 +226,88 @@
     </div>
 
     <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const langMap = {
+          en: {
+            title: "Install X7 CASINO?",
+            desc: "You can install the X7 Casino app to use the full features of the platform.",
+            install: "INSTALL",
+            dismiss: "No, thank you",
+            iosMobile:
+              'To install X7 CASINO on mobile, you need to click Share Icon and "Add to Home Screen" to add an icon to your device.',
+            iosDesktop:
+              'To install X7 CASINO on desktop, you need to click Share or Settings icon and "Add to dock" to add an icon to your desktop.',
+            ok: "Okay",
+          },
+          fr: {
+            title: "INSTALLER X7 CASINO ?",
+            desc: "Vous pouvez installer l'application X7 Casino pour profiter de toutes les fonctionnalités de la plateforme.",
+            install: "INSTALLER",
+            dismiss: "Non merci",
+            iosMobile:
+              "Pour installer la X7 CASINO sur mobile, vous devez cliquer sur l’icône de partage puis sur « Ajouter à l’écran d’accueil » pour ajouter une icône à votre appareil.",
+            iosDesktop:
+              "Pour installer la X7 CASINO sur ordinateur, cliquez sur l’icône de partage ou de paramètres puis sur « Ajouter au bureau » pour ajouter une icône à votre bureau.",
+            ok: "D'accord",
+          },
+          de: {
+            title: "X7 CASINO INSTALLIEREN?",
+            desc: "Sie können die X7 Casino App installieren, um alle Funktionen der Plattform zu nutzen.",
+            install: "INSTALLIEREN",
+            dismiss: "Nein, danke",
+            iosMobile:
+              "Um die X7 CASINO auf dem Handy zu installieren, tippe auf das Teilen-Symbol und dann auf „Zum Startbildschirm hinzufügen“, um ein Icon auf deinem Gerät zu erstellen.",
+            iosDesktop:
+              "Um die X7 CASINO auf dem Desktop zu installieren, klicke auf das Teilen- oder das Einstellungs-Symbol und dann auf „Zum Desktop hinzufügen“, um ein Icon auf deinem Desktop zu erstellen.",
+            ok: "Okay",
+          },
+          it: {
+            title: "INSTALLA X7 CASINO?",
+            desc: "Puoi installare l'app di X7 Casino per utilizzare tutte le funzionalità della piattaforma.",
+            install: "INSTALLA",
+            dismiss: "No, grazie",
+            iosMobile:
+              "Per installare la X7 CASINO su mobile, tocca l’icona di condivisione e seleziona «Aggiungi alla schermata Home» per aggiungere l’icona al tuo dispositivo.",
+            iosDesktop:
+              "Per installare la X7 CASINO su desktop, clicca sull’icona di condivisione o impostazioni e poi su «Aggiungi al desktop» per aggiungere l’icona sul tuo computer.",
+            ok: "Va bene",
+          },
+          es: {
+            title: "¿INSTALAR X7 CASINO?",
+            desc: "Puedes instalar la app de X7 Casino para disfrutar de todas las funciones de la plataforma.",
+            install: "INSTALAR",
+            dismiss: "No, gracias",
+            iosMobile:
+              "Para instalar la X7 CASINO en el móvil, pulsa el ícono de compartir y luego «Agregar a la pantalla de inicio» para añadir un ícono a tu dispositivo.",
+            iosDesktop:
+              "Para instalar la X7 CASINO en el escritorio, haz clic en el ícono de compartir o configuración y luego en «Agregar al escritorio» para colocar un ícono en tu escritorio.",
+            ok: "De acuerdo",
+          },
+        };
+
+        const pathLang = location.pathname.match(/\/(fr|ca-fr)\b/)
+          ? "fr"
+          : location.pathname.match(/\/(de)\b/)
+          ? "de"
+          : location.pathname.match(/\/(it)\b/)
+          ? "it"
+          : location.pathname.match(/\/(es)\b/)
+          ? "es"
+          : "en"; // covers en, ca-en, au-en, or anything else
+
+        const text = langMap[pathLang];
+
+        document.querySelector(".install-text h2").textContent = text.title;
+        document.querySelector(".install-text p").textContent = text.desc;
+        document.getElementById("install-btn").textContent = text.install;
+        document.getElementById("dismiss-btn").textContent = text.dismiss;
+        document.getElementById("ios-msg-mobile").firstChild.textContent =
+          text.iosMobile;
+        document.getElementById("ios-msg-desktop").textContent =
+          text.iosDesktop;
+        document.getElementById("ios-ok-btn").textContent = text.ok;
+      });
+
       let deferredPrompt;
       const DISMISS_FLAG = "x7_installed";
       const MODAL_FLAG = "x7_ios_modal";
@@ -273,8 +355,7 @@
       // Install button logic
       document.getElementById("install-btn").addEventListener("click", () => {
         if (
-          (isIos || isMac) &&
-          isSafari &&
+          ((isIos && isSafari) || (isMac && isSafari)) &&
           !isStandalone &&
           !alreadyDismissed
         ) {
