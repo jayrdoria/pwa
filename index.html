@@ -308,6 +308,9 @@
       document
         .getElementById("ios-ok-btn")
         .addEventListener("click", closeIosModal);
+      document.getElementById("close-modal").addEventListener("click", () => {
+        document.getElementById("ios-modal").style.display = "none";
+      });
 
       // NO THANKYOU button
       document
